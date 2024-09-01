@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tydi"
-version = "0.1.1"
+version = "0.2.0"
 description = "Multiple dispatch with mypy support"
 authors = ["Rama Krishna Reddy Gade <you@example.com>"]
 readme = "README.md"
