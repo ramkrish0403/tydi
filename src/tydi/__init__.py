@@ -1,6 +1,4 @@
-from .overload import overload
 from .dispatch import dispatch
-from .register import register
-from .multi_dispatch import MultiDispatch
+from .overload import get_overloads, overload
 
-__all__ = ["overload", "dispatch", "register", "MultiDispatch"]
+__all__ = ["overload", "get_overloads", "dispatch"]

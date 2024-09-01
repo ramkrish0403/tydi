@@ -1,16 +1,19 @@
-from inspect import signature
-from typing import Any, Callable, Dict, List, Tuple, get_type_hints, TypeVar
 import asyncio
 from asyncio import iscoroutinefunction
+from inspect import signature
+from typing import Any, Callable, Dict, List, Tuple, TypeVar, get_type_hints
 
 from beartype.door import is_bearable
+
+from .inspectors import ClassInspector, MethodInspector, ModuleInspector
 
 T = TypeVar("T")
 
 
 class MultiMethod:
-    def __init__(self, name: str):
-        self.name = name
+    def __init__(self, func: Callable, is_inspected: bool = False):
+        self.is_inspected = is_inspected
+        self.func = func
         self.methods: List[Callable] = []
 
     def register(self, func: Callable):
@@ -23,7 +26,7 @@ class MultiMethod:
                     return asyncio.create_task(method(*args, **kwargs))
                 return method(*args, **kwargs)
         raise TypeError(
-            f"No matching method found for {self.name} with given arguments"
+            f"No matching method found for {self.func} with given arguments"
         )
 
     def _match_args(
@@ -45,21 +48,47 @@ class MultiMethod:
 
 class MultiDispatch:
     def __init__(self):
-        self.registry: Dict[str, MultiMethod] = dict()
+        self.registry: Dict[Callable[..., T], MultiMethod] = dict()
+
+    def _is_registered(self, func: Callable[..., T]) -> bool:
+        return func in self.registry
+
+    def _get_overloaded_functions(
+        self, func: Callable[..., T]
+    ) -> List[Callable[..., T]]:
+        overloaded_funcs = []
+        if MethodInspector.is_class_method(func):
+            overloaded_funcs = ClassInspector.get_overloaded_methods(
+                MethodInspector.get_name(func),
+                MethodInspector.get_class(func),
+            )
+        elif ModuleInspector.is_module_function(func):
+            overloaded_funcs = ModuleInspector.get_overloaded_functions(
+                func.__module__, func.__name__
+            )
+        return overloaded_funcs
+
+    def _register_overloaded_functions(self, func, overloaded_funcs) -> None:
+        for _func in overloaded_funcs:
+            self.registry[func].register(_func)
+        return
 
     def register(self, func: Callable[..., T]) -> None:
-        name = func.__name__
-        if name not in self.registry:
-            self.registry[name] = MultiMethod(name)
-        self.registry[name].register(func)
+        if self._is_registered(func):
+            return
+
+        self.registry[func] = MultiMethod(func, is_inspected=False)
         return
 
     def dispatch(self, func: Callable[..., T], *args, **kwargs) -> T:
-        name = func.__name__
-        if name not in self.registry:
-            raise TypeError(
-                f"No matching method found for {name} with given arguments"
-            )
-
-        multi_method = self.registry[name]
+        multi_method = self.registry[func]
+        if not multi_method.is_inspected:
+            overloaded_funcs = self._get_overloaded_functions(func)
+            self._register_overloaded_functions(func, overloaded_funcs)
+            self.registry[func].is_inspected = True
         return multi_method(*args, **kwargs)
+
+
+dispatcher = MultiDispatch()
+
+__all__ = ["dispatcher"]
