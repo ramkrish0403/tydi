@@ -8,7 +8,7 @@ packages = [{include = "tydi", from = "src"}]
 include = ["src/tydi/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 beartype = "^0.18.5"
 
 

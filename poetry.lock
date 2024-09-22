@@ -20,5 +20,5 @@ test-tox-coverage = ["coverage (>=5.5)"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.12"
-content-hash = "1e291f272ca5a8a8c7e7f52112bae7f9560e4c94cf6bf8f228c60cfe57fa32c4"
+python-versions = "^3.8"
+content-hash = "cae04d2cb7d288d1abd07f637523b18fe90bf8aae1f23852c51cbbde80bb857f"
