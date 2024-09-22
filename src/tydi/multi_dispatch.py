@@ -48,9 +48,9 @@ class MultiMethod:
 
 class MultiDispatch:
     def __init__(self):
-        self.registry: Dict[Callable[..., T], MultiMethod] = dict()
+        self.registry: Dict[Callable[..., Any], MultiMethod] = dict()
 
-    def _is_registered(self, func: Callable[..., T]) -> bool:
+    def _is_registered(self, func: Callable[..., Any]) -> bool:
         return func in self.registry
 
     def _get_overloaded_functions(
@@ -91,4 +91,4 @@ class MultiDispatch:
 
 dispatcher = MultiDispatch()
 
-__all__ = ["dispatcher"]
+__all__ = ["dispatcher", "MultiDispatch"]
