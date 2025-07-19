@@ -1,17 +1,21 @@
-[tool.poetry]
+[project]
 name = "tydi"
-version = "0.2.1"
+version = "0.3.0"
 description = "Multiple dispatch with type support"
-authors = ["Rama Krishna Reddy Gade <you@example.com>"]
 readme = "README.md"
+package-mode = true
 packages = [{include = "tydi", from = "src"}]
+requires-python = "<3.12.0a1,>=3.11"
+authors = [
+    {name = "Rama Krishna", email = ""},
+]
 include = ["src/tydi/py.typed"]
 
-[tool.poetry.dependencies]
-python = "^3.7"
-beartype = "^0.18.5"
 
+dependencies = [
+    "beartype>=0.21.0",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
