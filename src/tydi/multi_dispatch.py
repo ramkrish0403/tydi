@@ -50,6 +50,11 @@ class MultiMethod:
                 logger.debug(
                     f"Checking argument: {param_name} = {arg} of type {type(arg)}"
                 )
+
+                if param_name == "self":
+                    matched_params.add(param_name)
+                    continue
+
                 if param_name in type_hints:
                     if not is_bearable(arg, type_hints[param_name]):
                         logger.debug(
@@ -62,6 +67,9 @@ class MultiMethod:
                         )
                         matched_params.add(param_name)
                 else:
+                    logger.debug(
+                        f"Argument {param_name} is not in func type hints, type check failed"
+                    )
                     return False
 
             unmatched_params = set()
