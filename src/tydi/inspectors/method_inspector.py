@@ -1,11 +1,13 @@
 import inspect
+import logging
 import sys
 import types
 from typing import Type, Union
 
+logger = logging.getLogger("tydi.inspectors.method_inspector")
+
 
 class MethodInspector:
-
     @staticmethod
     def is_class_method(method: object) -> bool:
         """
@@ -39,14 +41,13 @@ class MethodInspector:
         :param method: The method or function to inspect.
         :return: The class that defines the method or function.
         """
-        print(type(method))
         if isinstance(method, property):
             method = method.fget
 
         if hasattr(method, "__self__"):
             # Bound method
             return method.__self__.__class__
-        
+
         # Extract the class name from __qualname__
         class_name = method.__qualname__.split(".<locals>", 1)[0].rsplit(".", 1)[0]
 

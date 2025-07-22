@@ -1,12 +1,14 @@
 import importlib
 import inspect
+import logging
 from typing import Callable, List
 
 from ..overload import get_overloads
 
+logger = logging.getLogger("tydi.inspectors.module_inspector")
+
 
 class ModuleInspector:
-
     @staticmethod
     def is_module_function(func: Callable) -> bool:
         return inspect.isfunction(func) and not inspect.ismethod(func)
@@ -38,6 +40,9 @@ class ModuleInspector:
 
         # Get the overloads
         overloads = get_overloads(func)
+        logger.debug(
+            f"Found {len(overloads)} overloads for function '{function_name}' in module '{module_name}'."
+        )
 
         # If no overloads are found, it might mean the function isn't overloaded,
         # or we're using a Python version earlier than 3.11

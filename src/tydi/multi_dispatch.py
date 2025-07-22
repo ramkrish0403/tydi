@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from asyncio import iscoroutinefunction
 from inspect import signature
 from typing import Any, Callable, Dict, List, Tuple, TypeVar, get_type_hints
@@ -6,6 +7,8 @@ from typing import Any, Callable, Dict, List, Tuple, TypeVar, get_type_hints
 from beartype.door import is_bearable
 
 from .inspectors import ClassInspector, MethodInspector, ModuleInspector
+
+logger = logging.getLogger("tydi.multi_dispatch")
 
 T = TypeVar("T")
 
@@ -22,6 +25,9 @@ class MultiMethod:
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         for method in self.methods:
             if self._match_args(method, args, kwargs):
+                logger.debug(
+                    f"Matched the args {args} and kwargs {kwargs} with method signature: {get_type_hints(method)}"
+                )
                 if iscoroutinefunction(method):
                     return asyncio.create_task(method(*args, **kwargs))
                 return method(*args, **kwargs)
@@ -36,11 +42,37 @@ class MultiMethod:
         try:
             bound_args = sig.bind(*args, **kwargs)
             type_hints = get_type_hints(func)
-
+            logger.debug(
+                f"\n\nMatching the bound arguments {bound_args.arguments} with func type hints: {type_hints}"
+            )
+            matched_params = set()
             for param_name, arg in bound_args.arguments.items():
+                logger.debug(
+                    f"Checking argument: {param_name} = {arg} of type {type(arg)}"
+                )
                 if param_name in type_hints:
                     if not is_bearable(arg, type_hints[param_name]):
+                        logger.debug(
+                            f"Argument {param_name} of type {type(arg)} does not match func type hint {type_hints[param_name]}"
+                        )
                         return False
+                    else:
+                        logger.debug(
+                            f"Argument {param_name} of type {type(arg)} matches func type hint {type_hints[param_name]}"
+                        )
+                        matched_params.add(param_name)
+                else:
+                    return False
+
+            unmatched_params = set()
+            for param in sig.parameters:
+                if param not in matched_params:
+                    unmatched_params.add(param)
+            if unmatched_params:
+                logger.debug(
+                    f"Unmatched parameters: {unmatched_params}, expected parameters: {sig.parameters.keys()}"
+                )
+                return False
             return True
         except TypeError:
             return False

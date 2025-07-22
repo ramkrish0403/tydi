@@ -1,8 +1,11 @@
 import inspect
+import logging
 from types import FunctionType
 from typing import Callable, Dict, List, Type
 
 from ..overload import get_overloads
+
+logger = logging.getLogger("tydi.inspectors.class_inspector")
 
 
 class ClassInspector:
