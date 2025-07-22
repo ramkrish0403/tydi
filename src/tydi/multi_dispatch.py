@@ -58,13 +58,19 @@ class MultiMethod:
                 if param_name in type_hints:
                     if not is_bearable(arg, type_hints[param_name]):
                         logger.debug(
-                            f"Argument {param_name} of type {type(arg)} does not match func type hint {type_hints[param_name]}"
+                            f"Argument {param_name} of type {type(arg)} does not match func type hint {type_hints[param_name]}. ID of the argument type: {id(type(arg))} and func type hint ID: {id(type_hints[param_name])}"
                         )
                         return False
                     else:
                         logger.debug(
-                            f"Argument {param_name} of type {type(arg)} matches func type hint {type_hints[param_name]}"
+                            f"Argument {param_name} of type {type(arg)} matches func type hint {type_hints[param_name]}. ID of the argument type: {id(type(arg))} and func type hint ID: {id(type_hints[param_name])}"
                         )
+                        # logger.debug(
+                        #     f"Argument module: {arg.__module__} and type hint module: {type_hints[param_name].__module__}"
+                        # )
+                        # logger.debug(
+                        #     f"Argument qualified name: {arg.__qualname__} and type hint qualified name: {type_hints[param_name].__qualname__}"
+                        # )
                         matched_params.add(param_name)
                 else:
                     logger.debug(
@@ -81,6 +87,10 @@ class MultiMethod:
                     f"Unmatched parameters: {unmatched_params}, expected parameters: {sig.parameters.keys()}"
                 )
                 return False
+
+            # logger.debug(
+            #     f"Matched the bound arguments {bound_args.arguments} with func type hints: {type_hints}"
+            # )
             return True
         except TypeError:
             return False
